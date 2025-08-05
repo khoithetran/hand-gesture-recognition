@@ -1,37 +1,36 @@
-# 🖼️ BLIP Image Captioning on COCO Dataset
+# ✋ Hand Gesture Recognition with Mediapipe and TensorFlow
 
-This project fine-tunes the BLIP (Bootstrapped Language Image Pretraining) model for generating English captions on images from the COCO 2017 dataset.
+This project builds a real-time hand gesture recognition system using keypoints extracted from webcam video and a custom-trained neural network classifier.
+
+## 🎯 Objective
+
+- Detect hand landmarks in real-time using [MediaPipe Hands](https://developers.google.com/mediapipe/solutions/vision/hand_landmarker).
+- Collect labeled keypoint data for various gestures.
+- Train a neural network classifier using TensorFlow.
+- Predict gestures live through webcam input.
 
 ## 📦 Dataset
 
-We use the [COCO 2017 Dataset](https://www.kaggle.com/datasets/awsaf49/coco-2017-dataset) from Kaggle, which contains:
-- 118,000+ training images
-- 5 captions per image
-- JSON format annotation files
+The gesture dataset is custom-built by:
+- Capturing hand keypoints via webcam using MediaPipe
+- Saving each gesture class (`thumbs_up`, `okay`, `peace`, etc.) as `.npy` files
+- Each sample includes 21 landmarks (x, y, z), resulting in a feature vector of shape (63,)
 
-Images and annotations were used to fine-tune a BLIP-based captioning model using a sequence-to-sequence objective.
+You can extend the dataset by adding your own gestures and retraining the model.
 
 ## 🤖 Model
 
-The base model is [Salesforce/BLIP](https://huggingface.co/Salesforce/blip-image-captioning-base), fine-tuned on the COCO dataset for English caption generation.
+We use a simple fully connected neural network implemented in TensorFlow/Keras:
 
-We export the final model in `.safetensors` format for deployment or inference.
+- Input: 63 features (21 hand keypoints × 3)
+- Hidden layers: Dense + ReLU
+- Output: Softmax layer for gesture classification
+
+The final model is exported as `gesture_classifier.h5`.
 
 ## 🧪 Usage
 
-You can load the model using Hugging Face Transformers:
+### Real-time prediction
 
 ```python
-from transformers import BlipProcessor, BlipForConditionalGeneration
-import torch
-from PIL import Image
-
-processor = BlipProcessor.from_pretrained("path/to/model")
-model = BlipForConditionalGeneration.from_pretrained("path/to/model").to("cuda")
-
-img = Image.open("example.jpg")
-inputs = processor(img, return_tensors="pt").to("cuda")
-out = model.generate(**inputs)
-caption = processor.decode(out[0], skip_special_tokens=True)
-
-print("📝 Caption:", caption)
+python run_realtime.py
