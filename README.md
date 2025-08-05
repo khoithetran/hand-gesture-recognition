@@ -34,4 +34,4 @@ The final model is exported as `gesture_classifier.h5`.
 Run real-time gesture prediction with:
 
 ```bash
-python run_model.py
+python GUI.py
